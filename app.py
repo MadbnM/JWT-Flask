@@ -27,7 +27,10 @@ class User(db.Model):
     name = db.Column(db.String(100))
     email = db.Column(db.String(70), unique = True)
     password = db.Column(db.String(80))
-  
+
+with app.app_context():
+    db.create_all()
+    
 # decorator for verifying the JWT
 def token_required(f):
     @wraps(f)

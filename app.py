@@ -1,5 +1,5 @@
 # flask imports
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, g, abort
 from flask_sqlalchemy import SQLAlchemy
 import uuid # for public id
 from  werkzeug.security import generate_password_hash, check_password_hash
@@ -7,7 +7,7 @@ from  werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
-  
+
 # creates Flask object
 app = Flask(__name__)
 # configuration
@@ -19,22 +19,24 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # creates SQLALCHEMY object
 db = SQLAlchemy(app)
-  
+
 # Database ORMs
 class User(db.Model):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key = True)
     public_id = db.Column(db.String(50), unique = True)
     name = db.Column(db.String(100))
-    email = db.Column(db.String(70), unique = True)
     password = db.Column(db.String(80))
 
- # Define the Role data-model
+    roles = db.relationship('Role', secondary='user_roles')
+
+# Define Role model
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+    name = db.Column(db.String(50))
 
-# Define the UserRoles association table
+# Define UserRoles model
 class UserRoles(db.Model):
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer(), primary_key=True)
@@ -44,6 +46,57 @@ class UserRoles(db.Model):
 with app.app_context():
     db.create_all()
     
+    admin_user = User.query.filter_by(name='admin').first()
+    if not admin_user:
+        admin_user = User(public_id = str(uuid.uuid4()), name='admin',password=generate_password_hash('admin'))
+        admin_user.roles.append(Role(name='Admin'))
+        db.session.add(admin_user)
+        db.session.commit()
+
+    admin_role = Role.query.filter_by(name='Admin').first()
+    if not admin_role:
+        admin_role = Role(name='Admin')
+        db.session.add(admin_role)
+        db.session.commit()
+
+    member_role = Role.query.filter_by(name='Member').first()
+    if not member_role:
+        member_role = Role(name='Member')
+        db.session.add(member_role)
+        db.session.commit()
+
+
+def roles_required(*role_required):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            token = request.headers.get('x-access-token')
+            if not token:
+                return jsonify({'message': 'Token is missing!'}), 401
+
+            try:
+                data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+                user = User.query.filter_by(public_id=data['public_id']).first()
+            except jwt.InvalidTokenError:
+                return jsonify({'message': 'Token is invalid!'}), 401
+            # Get the role ids for the specified role names
+            current_roles = UserRoles.query.filter_by(user_id=user.id).all()
+            authorized = 0
+            for current_role in current_roles:
+                role_name = Role.query.filter_by(id=current_role.role_id).first()
+                if role_name.name in role_required:
+                    authorized += 1
+
+            if not authorized > 0:
+                return jsonify({'message': 'Unauthorized!'}), 403
+            
+            # Save the user object in the Flask application context
+            g.user = user
+
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
 # decorator for verifying the JWT
 def token_required(f):
     @wraps(f)
@@ -58,7 +111,7 @@ def token_required(f):
   
         try:
             # decoding the payload to fetch the stored details
-            data = jwt.decode(token, app.config['SECRET_KEY'])
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS512', 'HS256'])
             current_user = User.query\
                 .filter_by(public_id = data['public_id'])\
                 .first()
@@ -68,13 +121,13 @@ def token_required(f):
             }), 401
         # returns the current logged in users context to the routes
         return  f(current_user, *args, **kwargs)
-  
     return decorated
-  
+
 # User Database Route
 # this route sends back list of users
 @app.route('/user', methods =['GET'])
 @token_required
+@roles_required ('Admin', 'Member')
 def get_all_users(current_user):
     # querying the database
     # for all the entries in it
@@ -86,31 +139,78 @@ def get_all_users(current_user):
         # appending the user data json
         # to the response list
         output.append({
+            'id' : user.id,
             'public_id': user.public_id,
-            'name' : user.name,
-            'email' : user.email
+            'name' : user.name
         })
   
     return jsonify({'users': output})
-  
+
+@app.route('/role', methods = ['POST', 'GET', 'DELETE'])
+@token_required
+def get_role(current_user):
+
+    payload = request.form
+
+    if request.method == 'GET':
+        roles = Role.query.all()
+        output = []
+        for role in roles:
+
+            output.append({
+                'id' : role.id,
+                'name': role.name
+            })
+        return jsonify({'roles': output})
+    
+    if request.method == 'POST':
+        #required
+        #user_name
+        #role_name
+
+        user = User.query.filter_by(name=payload.get('name')).first()
+        role = Role.query.filter_by(name=payload.get('role')).first()
+    
+        if not UserRoles.query.filter_by(user_id=user.id, role_id=role.id).first():
+            user_role = User.query.filter_by(name=user.name).first()
+            user_role.roles.append(Role(name=role.name))
+            db.session.commit()
+            return make_response(jsonify({'Message' : 'Role was successfully added!'}), 200)
+        else:
+            return make_response(jsonify({'Error' : 'Invalid!'}), 400)
+
+@app.route('/userroles', methods = ['POST', 'GET', 'DELETE'])
+@token_required
+def get_userroles(current_user):
+    if request.method == 'GET':
+        userroles = UserRoles.query.all()
+        output = []
+        for userrole in userroles:
+
+            output.append({
+                'id' : userrole.id,
+                'user_id': userrole.user_id,
+                'role_id' : userrole.role_id
+            })
+        return jsonify({'userroles': output})
+    
 # route for logging user in
-@app.route('/login', methods =['POST'])
+@app.route('/login', methods = ['POST'])
 def login():
     # creates dictionary of form data
     auth = request.form
-  
-    if not auth or not auth.get('email') or not auth.get('password'):
-        # returns 401 if any email or / and password is missing
+
+    if not auth or not auth.get('password'):
+        # returns 401 if any name and password is missing
         return make_response(
             'Could not verify',
             401,
             {'WWW-Authenticate' : 'Basic realm ="Login required !!"'}
         )
-  
     user = User.query\
-        .filter_by(email = auth.get('email'))\
+        .filter_by(name = auth.get('name'))\
         .first()
-  
+    
     if not user:
         # returns 401 if user does not exist
         return make_response(
@@ -125,8 +225,7 @@ def login():
             'public_id': user.public_id,
             'exp' : datetime.utcnow() + timedelta(minutes = 30)
         }, app.config['SECRET_KEY'])
-  
-        return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
+        return make_response(jsonify({'token' : token}), 201)
     # returns 403 if password is wrong
     return make_response(
         'Could not verify',
@@ -135,25 +234,24 @@ def login():
     )
   
 # signup route
-@app.route('/signup', methods =['POST'])
+@app.route('/user', methods =['POST'])
 def signup():
     # creates a dictionary of the form data
     data = request.form
   
     # gets name, email and password
-    name, email = data.get('name'), data.get('email')
+    name = data.get('name')
     password = data.get('password')
   
     # checking for existing user
     user = User.query\
-        .filter_by(email = email)\
+        .filter_by(name = name)\
         .first()
     if not user:
         # database ORM object
         user = User(
             public_id = str(uuid.uuid4()),
             name = name,
-            email = email,
             password = generate_password_hash(password)
         )
         # insert user

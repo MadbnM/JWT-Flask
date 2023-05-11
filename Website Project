@@ -15,10 +15,21 @@ Internal App
 
 Client Database
 Personal Info
+Inquiry
+  2. Aesthetic Consultation
+    - Medical Consult
+    expandle chart
+- Signature Soft copy ng charts
+- Need yung 
 Product Purchase
 Remaining Services
 Schedule
 Marketing
+
+Service Incentives
+Sales Incentives
+
+Booking System has dependencies in clien database
 
 Inquiries (Shop + Social Media + etc)
 Transactions
@@ -29,13 +40,27 @@ Prospects
 Daily Updates/Reporst
 Sales Dashboard
 Graphical Dashboard??
-Scheduling System
 
+Scheduling System
 Create Booking
 Delete Booking
 Edit/Update Booking
 Get Booking ( Sorting )
 Dashboard
+
+Target ( Clients to Book = Doctors + Nurse + Staff + Machine)
+
+Service
+Treatment = Nurse lang
+          = Clinician
+          = Doctor + Nurse
+          
+Dashboard
+
+Website - 50,000
+
+
+
 (Overall Estimated = 3-6 Months)
 
 Planning UX-UI & System Design - 1st Month

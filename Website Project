@@ -19,15 +19,25 @@ Inquiry
   2. Aesthetic Consultation
     - Medical Consult
     expandle chart
-- Signature Soft copy ng charts
-- Need yung 
-Product Purchase
-Remaining Services
-Schedule
-Marketing
+    - 1 Page na makikita yung Info
+    - 2. Transaction page 
+           - services ginawa
+            - injection 
+            - facelift
+            - Signature Soft copy ng charts
+              - Python OCR = image of signature
+Product Purchase - its either 1 Page or part ng isang page
+Remaining Services - its either 1 Page or part ng isang page
+Schedule - its either 1 Page or part ng isang page
 
-Service Incentives
+
+
+Service Incentives (Employee clinic - Nurse, clinician, doctor)
+  - Employee info
+  - services ginawa ( Service, Name client, etc)
 Sales Incentives
+  - Employee info
+  - ( Fb, Instagram, etc)
 
 Booking System has dependencies in clien database
 
@@ -50,12 +60,15 @@ Dashboard
 
 Target ( Clients to Book = Doctors + Nurse + Staff + Machine)
 
+Admin System for employees for availbility
+1st  step  if admin system is not yet done, ( Booking of date only)
+2nd Upgrade ( with Doctors availabilty, depencies is admin system
+
 Service
 Treatment = Nurse lang
           = Clinician
           = Doctor + Nurse
-          
-Dashboard
+ex. ( Available Doctor, Available Date
 
 Website - 50,000
 

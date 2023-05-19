@@ -8,7 +8,6 @@ import jwt
 from datetime import datetime, timedelta
 from functools import wraps
 
-
 # creates Flask object
 app = Flask(__name__)
 # configuration

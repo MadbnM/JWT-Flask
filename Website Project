@@ -1,0 +1,88 @@
+Website
+
+UX-UI (Design)
+Contents = Derma & surgical
+1 Service - 1 page?
+Color Scheme and Branding
+Files
+Pages
+Home Page = Welcome Part, Company Image Info, Contact Form, SiteMap, Sponsors or Partners, About us, Business Contact
+Copy Right
+Footer
+Services Pages = List of Services
+Contact Page, Booking Page
+Internal App
+
+Client Database
+Personal Info
+Inquiry
+  2. Aesthetic Consultation
+    - Medical Consult
+    expandle chart
+    - 1 Page na makikita yung Info
+    - 2. Transaction page 
+           - services ginawa
+            - injection 
+            - facelift
+            - Signature Soft copy ng charts
+              - Python OCR = image of signature
+Product Purchase - its either 1 Page or part ng isang page
+Remaining Services - its either 1 Page or part ng isang page
+Schedule - its either 1 Page or part ng isang page
+
+
+
+Service Incentives (Employee clinic - Nurse, clinician, doctor)
+  - Employee info
+  - services ginawa ( Service, Name client, etc)
+Sales Incentives
+  - Employee info
+  - ( Fb, Instagram, etc)
+
+Booking System has dependencies in clien database
+
+Inquiries (Shop + Social Media + etc)
+Transactions
+Database of billing, transactions
+Inventory
+Repeat sales
+Prospects
+Daily Updates/Reporst
+Sales Dashboard
+Graphical Dashboard??
+
+Scheduling System
+Create Booking
+Delete Booking
+Edit/Update Booking
+Get Booking ( Sorting )
+Dashboard
+
+Target ( Clients to Book = Doctors + Nurse + Staff + Machine)
+
+Admin System for employees for availbility
+1st  step  if admin system is not yet done, ( Booking of date only)
+2nd Upgrade ( with Doctors availabilty, depencies is admin system
+
+Service
+Treatment = Nurse lang
+          = Clinician
+          = Doctor + Nurse
+ex. ( Available Doctor, Available Date
+
+Website - 50,000
+
+
+
+(Overall Estimated = 3-6 Months)
+
+Planning UX-UI & System Design - 1st Month
+Planning Infrastructure & Language - 2nd Month (1st-2nd weeks)
+Execution (depends on system design and ux-ui)
+Commitment needed = ?(1-3 Months? ,1-6 Months?)
+
+https://www.takefiveoutdoors.com/
+
+Docker<10k users
+
+3 Months
